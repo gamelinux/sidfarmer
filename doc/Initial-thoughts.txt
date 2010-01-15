@@ -1,0 +1,238 @@
+# SQL based repo, or puppet ?
+
+One updated file repository for all rules (from different sources)
+One perl engine that fires after oinkmaster or from cron, and adds new
+stuff to the db. One default table that holds all default rules.
+
+One gui, that will show sensors that has updated ruls available.
+You can enter the sensor overview, look at the updated rules and update 
+the sensor rules list. If one rule is a new version, it should show
+last local-modified version, if excists!
+
+One needs a function to distrobute the new rules, and maybe restart
+the sensor? A own entery for the init restart script ?
+
+Metadata in mysql, sguildb? 
+ Needs: 
+   TABLE       | VARIABEL | COMMENT
+   sensor-name : text     : cia, fbi etc.
+   sid         : number   : Snort id
+   rev-id      : number   : Snort Rev
+   Updated     : bool     : If a rule has been updated (Rev nr higher)
+   local       : bool     : If the rule has been local modified
+   rule        : text     : The rule, if modefied
+
+# SNORTVARIABLES
+   HOME_NET
+   EXTERNAL_NET   
+   DNS_SERVERS
+   SMTP_SERVERS
+   HTTP_SERVERS
+   SQL_SERVERS
+   TELNET_SERVERS
+   SNMP_SERVERS
+   HTTP_PORTS 
+   SHELLCODE_PORTS
+   ORACLE_PORTS
+   AIM_SERVERS
+
+   RULE_PATH ?
+   
+   Preprocessors?
+   log facility ?
+
+   The whole config in db ?
+   Revision ?
+
+perl script that gets relevant data from mysql, and
+pushes the rules to each node.
+
+CREATE DATABASE IF NOT EXISTS snortconfdb;
+USE snortconfdb;
+
+CREATE TABLE scfg_default28
+(
+  sid	   INT UNSIGNED    NOT NULL;
+  rev_id   INT UNSIGNED    NOT NULL;
+  ...
+  HOME_NET        \
+  EXTERNAL_NET     > or the whole configfile as text?
+  HTTP_PORTS      /
+  ...
+  PRIMARY KEY (sid),
+  INDEX scfg_sid (sid)
+);
+
+CREATE TABLE scfg_sensor
+(
+  sid           INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+  hostname      VARCHAR(255)    NOT NULL,
+  agent_type    VARCHAR(40),
+  net_name      VARCHAR(40),
+  interface     VARCHAR(255),
+  description   TEXT,
+  bpf_filter    TEXT,
+  updated       TIMESTAMP(14) NOT NULL,
+  active        ENUM('Y','N') DEFAULT 'Y',
+  ip            VARCHAR(15) DEFAULT NULL,
+  public_key    VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (sid),
+  INDEX hostname_idx (hostname)
+);
+
+
+
+
+Simple GUI sketch
+
+Overview:
+|------------------------------------------------------------------------|
+|------------------------------------------------------------------------|
+|Server:equador.pronix.no|Sensors/up2date:14/11|Last fetched rules:$date |
+|------------------------------------------------------------------------|
+| [Overview]  [Change Server]  [Update Master Rules]  [Add New Sensor]   |
+|------------------------------------------------------------------------|
+| Sensor            | Status             | last updated | last restarted |
+|------------------------------------------------------------------------|  
+| 1. [equador]      | * Up2date          | $date1       | $date2         |
+| 2. [cuba]         | * Updates Available| $date1       | $date2         |
+| 3. [bolivia]      | * Needs restart    | $date1       | $date2         |
+| .                 | *                  |              |                |
+| .                 | *                  |              |                |
+| .                 | *                  |              |                |
+| 14 [brazil]       | * Up2date          |              |                |
+| -----------------------------------------------------------------------|                          
+|                                                                        |
+| Copyright (C) 2008 Edward Bjarte Fjellskål <edward@linpro.no>          |
+|------------------------------------------------------------------------|
+
+
+When you click on [sensor]:
+|------------------------------------------------------------------------|
+|------------------------------------------------------------------------|
+|Server:equador.pronix.no|Sensors/up2date:14/11|Last fetched rules:$date |
+|------------------------------------------------------------------------|
+| [Overview]  [Change Server]  [Update Master Rules]  [Add New Sensor]   |
+|------------------------------------------------------------------------|
+|                          Sensor: [sensor]                              |
+|------------------------------------------------------------------------|
+|                                                                        |
+| rules                   | Enabled | Updates Available | Local Modified |
+|------------------------------------------------------------------------|
+| [attack-responses.rules]|   Yes   |       No          | Yes
+| [backdoor.rules]        |   Yes   |       Yes         | No
+| [bad-traffic.rules]     |   Yes   |       No          | No             |
+| [chat.rules]            |   No    |       Yes         | No             |
+| .                       |   Yes   |       No          | No             |
+| .                       |   Yes   |       No          | No             |
+| .                       |   Yes   |       No          | No             |
+| [web-misc.rules]        |   Yes   |       No          | Yes            |
+| [web-php.rules]         |   Yes   |       No          | Yes            |
+| [x11.rules]             |   Yes   |       No          | No             |
+|------------------------------------------------------------------------|
+| Copyright (C) 2008 Edward Bjarte Fjellskål <edward@linpro.no>          |
+|------------------------------------------------------------------------|
+
+
+When you click on [sensor.[rule]]
+|------------------------------------------------------------------------|
+|------------------------------------------------------------------------|
+|Server:equador.pronix.no|Sensors/up2date:14/11|Last fetched rules:$date |
+|------------------------------------------------------------------------|
+| [Overview]  [Change Server]  [Update Master Rules]  [Add New Sensor]   |
+|------------------------------------------------------------------------|
+|                     Sensor: [sensor]                                   |
+|------------------------------------------------------------------------|
+|                     Rules:  [exploit.rules]      [Save Rules] [Revert] |
+|------------------------------------------------------------------------|
+|  SID     |            RULE                             |Enabled| LocalE|
+|          |---------------------------------------------|---------------| 
+| sid: 302 |alert tcp $EXTERNAL_NET any -> $HOME_NET 515 |  Yes  | No    |
+|          |(msg:"EXPLOIT Redhat 7.0 lprd overflow";flow:|       |       |
+|          |to_server,established;content:"XXXX%.172u%300|       |       |
+|          ||24|n";metadata:policy balanced-ips drop,    |       |       |
+|          |policy security-ips drop; reference:bugtraq, |       |       | 
+|          |1712;reference:cve,2000-0917; classtype:     |       |       |
+|          |attempted-admin; sid:302;rev:11;)            |       |       |
+|          |---------------------------------------------|-------|-------|
+.          |                                             |       |       |
+.          .                                             .       .       .
+.          |                                             |       |       |
+|          |---------------------------------------------|-------|-------|
+| sid: 303 | alert tcp $EXTERNAL_NET any -> $HOME_NET 515|  Yes  | Yes   |
+|          |---------------------------------------------|-------|-------|
+|
+.
+.
+.
+|------------------------------------------------------------------------|
+| Copyright (C) 2008 Edward Bjarte Fjellskål <edward@linpro.no>          |
+|------------------------------------------------------------------------|
+
+
+
+
+
+Add new Sensor:
+in the sensor tab?
+
+
+
+
+
+Del Sensor:
+in the sensor tab?
+
+Master Rules Config:
+In the rules tab - spesified by sensor-type (Master-Templates)
+
+
+## senname: cuba
+## senintf: eth0
+## hostname:
+## ip:
+
+
+
+CREATE TABLE `sensor` (
+  `sid` int(10) unsigned NOT NULL auto_increment,
+  `hostname` varchar(255) NOT NULL,
+  `agent_type` varchar(40) default NULL,
+  `net_name` varchar(40) default NULL,
+  `interface` varchar(255) default NULL,
+  `description` text,
+  `bpf_filter` text,
+  `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `active` enum('Y','N') default 'Y',
+  `ip` varchar(15) default NULL,
+  `public_key` varchar(255) default NULL,
+  PRIMARY KEY  (`sid`),
+  KEY `hostname_idx` (`hostname`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1
+
+
+mysql> select * from sensor;
++-----+----------+------------+----------+-----------+-------------+------------+---------------------+--------+------+------------+
+| sid | hostname | agent_type | net_name | interface | description | bpf_filter | updated             | active | ip   | public_key |
++-----+----------+------------+----------+-----------+-------------+------------+---------------------+--------+------+------------+
+|   1 | equador  | sancp      | Ext_Net  | NULL      | NULL        | NULL       | 2008-07-09 12:52:11 | Y      | NULL | NULL       | 
+|   2 | equador  | snort      | Ext_Net  | NULL      | NULL        | NULL       | 2008-07-09 12:52:11 | Y      | NULL | NULL       | 
+|   3 | equador  | pcap       | Ext_Net  | NULL      | NULL        | NULL       | 2008-07-09 12:52:11 | Y      | NULL | NULL       | 
+|   4 | bolivia  | snort      | Linpro   | NULL      | NULL        | NULL       | 2008-07-09 13:37:50 | Y      | NULL | NULL       | 
+|   5 | bolivia  | pcap       | Linpro   | NULL      | NULL        | NULL       | 2008-07-09 13:38:06 | Y      | NULL | NULL       | 
+|   6 | bolivia  | sancp      | Linpro   | NULL      | NULL        | NULL       | 2008-07-09 13:38:11 | Y      | NULL | NULL       | 
+|   7 | bolivia  | pads       | Ext_Net  | NULL      | NULL        | NULL       | 2008-08-27 14:48:20 | Y      | NULL | NULL       | 
+|   8 | equador  | pads       | Ext_Net  | NULL      | NULL        | NULL       | 2008-09-04 19:06:07 | Y      | NULL | NULL       | 
++-----+----------+------------+----------+-----------+-------------+------------+---------------------+--------+------+------------+
+
+
+INSERT INTO rman_varvals (vid, sid, value, comment) VALUES (1,0,'any','Default definition for HOME_NET');
+
+INSERT INTO sensor (sid,hostname,interface,updated,active,ip) VALUES (1,cuba,'eth0','2008-07-09 12:52:11','Y','81.31.233.9');
+
+
+
+
+* Need to add rules with original SID.
+* Need to check for duplicate SID and how to handle it (Maybe se oinkmaster?)
+

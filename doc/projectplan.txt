@@ -1,0 +1,24 @@
+# Game plan for pigfarmer:
+## September 2008 
+
+* Make the DB  (90% done?)
+
+1. Make the perl scrip that imports the snort rules to the database. (99% done?)
+
+2. Make the Simple php-GUI first (add sensorgroup, rulegroup, preproc_group)
+
+3. Add simple sensor admin (List sensors, add sensors)
+
+4. Add per sensor rule and rulegroup admin.
+
+5. Add provisioning.
+
+6. Add sensor groups (sensor group have same rules etc ?)
+
+7. Check that all is sane.
+
+8. Public release 0.1-beta :)
+
+9. Get SO rules in place
+
+10. better GUI...
