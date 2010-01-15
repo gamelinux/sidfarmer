@@ -1,0 +1,28 @@
+## PIGFARMER
+
+
+This is something I started back in september 2008,
+and never got around to finish it. 
+
+Status, Jan2010
+I made the initial mysql tables.
+I made the perl script to pars the rulefiles, and insert them
+to the mysql tables.
+I made a simple webgui, but nothing works execept viewing stuff.
+ - Can not manage nothing :/ yet...
+
+Im releasing the code/project, and maybe that will make me
+push myself to redo the webgui part soon. 
+
+I have not commited the webgui. I will re-write it based on
+what I learned from my fpcgui project. And push something
+new for you all! Hopefully by the end of 2010!
+
+Now that Suricata is out, which dont use SO rules (The main
+thing that took away my drive from this project) I might
+get eager to work some more on this :)
+
+
+Edward
+
+
